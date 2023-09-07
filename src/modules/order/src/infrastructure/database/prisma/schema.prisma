@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id        String   @id @unique @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+
+  orders   Order[]
+  Employee Employee[]
+
+  @@map("restaurant")
+}
+
+enum EmployeePost {
+  WAITER
+}
+
+model Employee {
+  id           String       @id @unique @db.Uuid
+  post         EmployeePost
+  restaurantId String       @db.Uuid
+  createdAt    DateTime     @default(now()) @db.Timestamptz()
+
+  restaurant    Restaurant      @relation(fields: [restaurantId], references: [id])
+  OrderEmployee OrderEmployee[]
+
+  @@map("employee")
+}
+
+model Customer {
+  id        String   @id @unique @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  cart   Cart?
+  orders Order[]
+  Member Member?
+
+  @@map("customer")
+}
+
+model Member {
+  id         String   @id @unique @db.Uuid
+  customerId String   @unique @db.Uuid
+  discount   Int      @db.SmallInt
+  createdAt  DateTime @default(now()) @db.Timestamptz()
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("member")
+}
+
+model Meal {
+  id          String   @id @unique @db.Uuid
+  name        String   @unique @db.VarChar(30)
+  description String   @db.VarChar(1000)
+  price       Int      @db.SmallInt
+  isDeleted   Boolean
+  createdAt   DateTime @default(now()) @db.Timestamptz()
+  updatedAt   DateTime @updatedAt @db.Timestamptz()
+
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@map("meal")
+}
+
+model Cart {
+  id         String   @id @unique @db.Uuid
+  customerId String   @unique @db.Uuid
+  amount     Int      @db.SmallInt
+  createdAt  DateTime @default(now()) @db.Timestamptz()
+  updatedAt  DateTime @updatedAt @db.Timestamptz()
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  cartItems CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id        String @id @unique @db.Uuid
+  cartId    String @db.Uuid
+  mealId    String @db.Uuid
+  quantity  Int    @db.SmallInt
+  unitPrice Int    @db.SmallInt
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  meal Meal @relation(fields: [mealId], references: [id])
+
+  @@map("cart_item")
+}
+
+enum OrderStatus {
+  OPEN
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderType {
+  DELIVERY
+  INSIDE
+}
+
+model Order {
+  id           String      @id @unique @db.Uuid
+  restaurantId String?     @db.Uuid
+  customerId   String      @db.Uuid
+  isPaid       Boolean
+  status       OrderStatus
+  type         OrderType?
+  amount       Int         @db.SmallInt
+  createdAt    DateTime    @default(now()) @db.Timestamptz()
+
+  restaurant Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+  customer   Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  orderItems    OrderItem[]
+  orderAddress  OrderAddress[]
+  OrderEmployee OrderEmployee[]
+
+  @@map("order")
+}
+
+model OrderItem {
+  id        String @id @unique @db.Uuid
+  orderId   String @db.Uuid
+  mealId    String @db.Uuid
+  quantity  Int    @db.SmallInt
+  unitPrice Int    @db.SmallInt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  meal  Meal  @relation(fields: [mealId], references: [id])
+
+  @@map("order_item")
+}
+
+model OrderEmployee {
+  orderId    String @unique @db.Uuid
+  employeeId String @db.Uuid
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("order_employee")
+}
+
+model OrderAddress {
+  id      String @id @unique @db.Uuid
+  orderId String @db.Uuid
+  street  String
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_address")
+}
