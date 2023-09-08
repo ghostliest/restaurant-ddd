@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  ACCEPTED
+  COOK
+  COOKED
+}
+
+model Order {
+  id     String      @id @unique @db.Uuid
+  status OrderStatus
+
+  order_items OrderItem[]
+
+  @@map("order")
+}
+
+model OrderItem {
+  id       String @id @unique @db.Uuid
+  order_id String @db.Uuid
+  meal_id  String @db.Uuid
+  name     String @db.VarChar(30)
+  quantity Int    @db.SmallInt
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@map("order_item")
+}
