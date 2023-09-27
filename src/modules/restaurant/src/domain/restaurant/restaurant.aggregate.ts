@@ -1,8 +1,12 @@
 import { AggregateRoot, EntityID } from "@/core/domain";
 import { Result } from "@/core/monads";
-import { IRestaurantCreateProps, IRestaurantProps } from ".";
+import { IRestaurantCreateProps, IRestaurantProps, Table } from ".";
 
 export class Restaurant extends AggregateRoot<IRestaurantProps> {
+  get tables(): Table[] {
+    return this.props.tables;
+  }
+
   private constructor(props: IRestaurantProps, id?: EntityID) {
     super(props, id);
   }
@@ -15,6 +19,9 @@ export class Restaurant extends AggregateRoot<IRestaurantProps> {
     return Result.ok<Restaurant>(
       new Restaurant({
         ...props,
+        tables: [],
+        isDeleted: false,
+        createdAt: new Date(),
       }),
     );
   }
