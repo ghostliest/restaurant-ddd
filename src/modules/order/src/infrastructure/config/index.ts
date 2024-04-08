@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { checkEnv } from "@/core/utils";
 
 const {
   PORT,
@@ -9,6 +10,16 @@ const {
   JWT_SECRET,
   JWT_EXPIRY_TIME,
 } = process.env;
+
+checkEnv({
+  PORT,
+  GLOBAL_PREFIX,
+  SWAGGER_PATH,
+  RABBITMQ_URL,
+  RABBITMQ_QUEUE_NAME,
+  JWT_SECRET,
+  JWT_EXPIRY_TIME,
+});
 
 const auth = {
   jwtSecret: JWT_SECRET,

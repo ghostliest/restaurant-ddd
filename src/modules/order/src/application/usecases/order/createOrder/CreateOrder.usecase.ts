@@ -4,10 +4,8 @@ import { AppError } from "@/core/error";
 import { Result, left, right } from "@/core/monads";
 import { ICartRepository } from "domain/cart";
 import { IOrderRepository, Order, OrderItem } from "domain/order";
-import { CreateOrderErrors } from "./CreateOrder.error";
-import { CreateOrderResponse } from "./CreateOrder.response";
-import { ICreateOrderDTO } from "./CreateOrder.dto";
 import { MealPrice } from "domain/meal";
+import { CreateOrderErrors, CreateOrderResponse, ICreateOrderDTO } from ".";
 
 export class CreateOrderUseCase
   implements UseCase<ICreateOrderDTO, Promise<CreateOrderResponse>>
